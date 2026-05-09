@@ -2,17 +2,24 @@
 
 import PlayerGameBoard from '@/features/Board/PlayerGameBoard';
 import TopPanel from '@/features/Board/TopPanel';
+import { ControlsModal } from '@/features/ControlsModal/ControlsModal';
 import { ModelObject, useGameLogic } from '@/features/hooks/useGameLogic';
 
 const Home = () => {
-  const { model, settings, setSettings, handlers, totalLines, level } =
-    useGameLogic();
-  const playersCount = settings.activePlayers.filter(
-    (element) => element === true,
-  ).length;
-  console.log(model?.[0]);
+  const {
+    model,
+    settings,
+    setSettings,
+    handlers,
+    totalLines,
+    level,
+    isControlModalOpen,
+    keyListening,
+    gameToast,
+  } = useGameLogic();
+
   return (
-    <div className="flex w-full h-screen overflow-y-auto flex-col bg-gradient-to-r py-4 md:px-16 from-neutral-50 to-neutral-200">
+    <div className="relative flex h-screen w-full flex-col overflow-y-auto bg-[radial-gradient(circle_at_center,_#fafafa_0%,_#f2f2f2_70%)] py-4 md:px-16">
       <TopPanel
         settings={settings}
         setSettings={setSettings}
@@ -20,17 +27,14 @@ const Home = () => {
         totalLines={totalLines}
         level={level}
       />
-      <div
-        className="relative mt-2 rounded-2xl h-full bg-neutral-100 p-2 gap-4 grid items-center"
-        style={{
-          gridTemplateColumns: `repeat(${playersCount}, minmax(0, 1fr))`,
-        }}
-      >
+
+      <div className="relative mt-2 flex flex-1 flex-wrap bg-neutral-100 border border-neutral-200 rounded-2xl px-4 py-6 justify-center gap-6 overflow-x-auto hide-scrollbar shadow-[0_12px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl">
         {settings.isGamePaused && (
-          <div className="w-full z-20  absolute animate-fade left-0 top-[50%] translate-y-[-50%] animate-fade shadow-lg  bg-gradient-to-br from-white/90 to-neutral-100/50 h-[100px] text-4xl font-semibold uppercase tracking-[0.2em] text-neutral-500  flex items-center justify-center">
+          <div className="absolute left-0 top-[50%] z-20 flex h-[100px] w-full translate-y-[-50%] items-center justify-center bg-gradient-to-br from-white/90 to-neutral-100/50 text-4xl font-semibold uppercase tracking-[0.2em] text-neutral-500 shadow-lg">
             Game Paused
           </div>
         )}
+
         {settings?.activePlayers?.map((player, index) => {
           if (!player) return null;
 
@@ -43,7 +47,19 @@ const Home = () => {
           );
         })}
       </div>
+
+      {isControlModalOpen && (
+        <ControlsModal
+          handleModalClose={handlers.closeControlModal}
+          startKeyBinding={handlers.startKeyBinding}
+          keyListening={keyListening}
+          settings={settings}
+          model={model}
+          gameToast={gameToast}
+        />
+      )}
     </div>
   );
 };
+
 export default Home;

@@ -7,7 +7,7 @@ type CellSize = 'board' | 'preview';
 
 const cellSizeClasses: Record<CellSize, string> = {
   board: 'aspect-square w-full h-full min-w-6',
-  preview: 'aspect-square w-5 h-5',
+  preview: 'aspect-square  w-4 h-4  xl:w-5 xl:h-5',
 };
 
 export const RenderEmptyCell = ({ size = 'board' }: { size?: CellSize }) => (
@@ -38,13 +38,15 @@ export const RenderNextPieceBoard = ({ type }: { type: PieceTypes | null }) => {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
       <div className="mb-4 text-center">
-        <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-400">
+        <div className="text-[8px] md:text-[11px] uppercase tracking-[0.22em] text-neutral-400">
           Upcoming
         </div>
-        <div className="text-lg font-semibold text-neutral-700">Next Piece</div>
+        <div className="text-[12px] lg:text-[16px]  leading-4 font-semibold text-neutral-700">
+          Next Piece
+        </div>
       </div>
 
-      <div className="flex items-center justify-center rounded-2xl border border-neutral-200 bg-white/80 shadow-inner min-h-[120px] min-w-[140px] px-3 py-3">
+      <div className="flex items-center justify-center rounded-2xl min-h-[120px] px-2 py-2">
         {type ? (
           <RenderNextPiece type={type} />
         ) : (

@@ -12,6 +12,32 @@ export interface ModelObject {
   score: number;
   isGameEnded: boolean;
 }
+type ControlBinding = {
+  label: string;
+  key: string;
+};
+export interface Controls {
+  rotate: ControlBinding;
+  left: ControlBinding;
+  right: ControlBinding;
+  softDrop: ControlBinding;
+  hardDrop: ControlBinding;
+}
+
+export type PlayerIndex = 0 | 1 | 2 | 3;
+export interface SettingsType {
+  activePlayers: boolean[];
+  isGamePaused: boolean;
+  controls: Record<PlayerIndex, Controls>;
+}
+
+type ControlKey = keyof Controls;
+
+export interface keyListeningType {
+  isOn: boolean;
+  playerID: PlayerIndex | null;
+  position: ControlKey | null;
+}
 
 const createEmptyBoard = () => STARTING_BOARD.map((row) => [...row]);
 
@@ -24,9 +50,103 @@ const createInitialPlayerModel = (): ModelObject => ({
   isGameEnded: false,
 });
 
-const initialSeting = {
+const initialSetting = {
   activePlayers: [true, false, false, false],
   isGamePaused: true,
+
+  controls: {
+    0: {
+      rotate: {
+        label: 'W',
+        key: 'KeyW',
+      },
+      left: {
+        label: 'A',
+        key: 'KeyA',
+      },
+      right: {
+        label: 'D',
+        key: 'KeyD',
+      },
+      softDrop: {
+        label: 'S',
+        key: 'KeyS',
+      },
+      hardDrop: {
+        label: 'Tab',
+        key: 'Tab',
+      },
+    },
+
+    1: {
+      rotate: {
+        label: '↑',
+        key: 'ArrowUp',
+      },
+      left: {
+        label: '←',
+        key: 'ArrowLeft',
+      },
+      right: {
+        label: '→',
+        key: 'ArrowRight',
+      },
+      softDrop: {
+        label: '↓',
+        key: 'ArrowDown',
+      },
+      hardDrop: {
+        label: 'Enter',
+        key: 'Enter',
+      },
+    },
+
+    2: {
+      rotate: {
+        label: '8',
+        key: 'Numpad8',
+      },
+      left: {
+        label: '4',
+        key: 'Numpad4',
+      },
+      right: {
+        label: '6',
+        key: 'Numpad6',
+      },
+      softDrop: {
+        label: '5',
+        key: 'Numpad5',
+      },
+      hardDrop: {
+        label: '0',
+        key: 'Numpad0',
+      },
+    },
+
+    3: {
+      rotate: {
+        label: 'I',
+        key: 'KeyI',
+      },
+      left: {
+        label: 'J',
+        key: 'KeyJ',
+      },
+      right: {
+        label: 'L',
+        key: 'KeyL',
+      },
+      softDrop: {
+        label: 'K',
+        key: 'KeyK',
+      },
+      hardDrop: {
+        label: 'U',
+        key: 'KeyU',
+      },
+    },
+  },
 };
 const scoreByLines: Record<number, number> = {
   0: 0,
@@ -92,10 +212,15 @@ const mergeToBoard = (board: BoardRow[], currentPiece: CurrentPiece) => {
 };
 
 export const useGameLogic = () => {
-  const [settings, setSettings] = useState(initialSeting);
+  const [isControlModalOpen, setIsControlModalOpen] = useState(false);
+  const [settings, setSettings] = useState<SettingsType>(initialSetting);
   const [model, setModel] = useState<(ModelObject | null)[]>([]);
   const [gameToast, setGameToast] = useState('');
-
+  const [keyListening, setKeyListening] = useState<keyListeningType>({
+    isOn: false,
+    playerID: null,
+    position: null,
+  });
   const [player1, player2, player3, player4] = model;
 
   const totalLines = useMemo(() => {
@@ -120,6 +245,68 @@ export const useGameLogic = () => {
     const gainedScore = Math.round(baseScore * (1 + level * 0.1));
 
     return { filteredBoard, clearedLines, gainedScore };
+  };
+
+  const startKeyBinding = (playerID: PlayerIndex, position: keyof Controls) => {
+    if (typeof playerID !== 'number' || !position) return;
+    setKeyListening((prev) => ({
+      isOn: true,
+      playerID: playerID,
+      position: position,
+    }));
+  };
+
+  const openControlModal = () => {
+    setSettings((prev) => ({ ...prev, isGamePaused: true }));
+    setIsControlModalOpen(true);
+  };
+
+  const closeControlModal = () => {
+    setSettings((prev) => ({ ...prev, isGamePaused: true }));
+
+    setIsControlModalOpen(false);
+  };
+
+  const handleKeyBinding = (label: string, value: string) => {
+    const playerID = keyListening.playerID;
+    const position = keyListening.position;
+
+    if (typeof playerID !== 'number' || !position || !value || !label) {
+      return;
+    }
+
+    setSettings((prev) => {
+      const currentAssignedKey = prev.controls[playerID][position]?.key;
+      const assignedKeys = Object.values(prev.controls).flatMap(
+        (playerControls) =>
+          Object.values(playerControls)?.map((element) => element?.key),
+      );
+
+      const isKeyTaken =
+        value !== currentAssignedKey &&
+        [...assignedKeys, 'KeyP'].includes(value);
+
+      if (isKeyTaken) {
+        setGameToast('Sorry, this key is already assigned.');
+        return prev;
+      }
+
+      return {
+        ...prev,
+        controls: {
+          ...prev.controls,
+          [playerID]: {
+            ...prev.controls[playerID],
+            [position]: {
+              label: label?.trim() ? label : 'Space Bar',
+              key: value,
+            },
+          },
+        },
+      };
+    });
+
+    setKeyListening({ isOn: false, playerID: null, position: null });
   };
 
   const lockPlayerPiece = useCallback(
@@ -184,12 +371,13 @@ export const useGameLogic = () => {
     setModel((prev) =>
       prev.map((player) => {
         if (!player) return null;
+        if (player.isGameEnded) return player;
         return applyGravityToPlayer(player);
       }),
     );
   }, [settings.isGamePaused, applyGravityToPlayer]);
 
-  const handleAcitvePlayerClick = useCallback((value: number) => {
+  const handleActivePlayerClick = useCallback((value: number) => {
     setSettings((prev) => {
       const newValue = [...prev.activePlayers];
 
@@ -207,6 +395,7 @@ export const useGameLogic = () => {
 
       return {
         ...prev,
+        isGamePaused: true,
         activePlayers: newValue,
       };
     });
@@ -217,9 +406,7 @@ export const useGameLogic = () => {
       const players = settings.activePlayers.map((isActive, index) => {
         if (!isActive) return null;
 
-        return prev[index]
-          ? createInitialPlayerModel()
-          : createInitialPlayerModel();
+        return createInitialPlayerModel();
       });
 
       return players;
@@ -240,15 +427,32 @@ export const useGameLogic = () => {
 
   const handleGameSave = useCallback(() => {
     try {
-      localStorage.setItem('TetrisSetup', JSON.stringify(model));
+      localStorage.setItem('arcadeTETRIS-game', JSON.stringify(model));
       setGameToast('Game saved!');
     } catch (error) {
       setGameToast((error as Error)?.message);
     }
   }, [model]);
 
+  const handleSettingsLoad = useCallback(() => {
+    const rawSavedSettings = localStorage.getItem('arcadeTETRIS-controls');
+
+    if (!rawSavedSettings) {
+      setGameToast('No saved controls available');
+      return;
+    }
+    const savedSetting = JSON?.parse(rawSavedSettings);
+
+    if (!savedSetting) {
+      setGameToast('Sorry, error occurred');
+      return;
+    }
+
+    setSettings(savedSetting);
+  }, []);
+
   const handleGameLoad = useCallback(() => {
-    const rawSavedGame = localStorage.getItem('TetrisSetup');
+    const rawSavedGame = localStorage.getItem('arcadeTETRIS-game');
 
     try {
       setSettings((prev) => ({ ...prev, isGamePaused: true }));
@@ -259,13 +463,18 @@ export const useGameLogic = () => {
       }
 
       const savedGame: (ModelObject | null)[] = JSON.parse(rawSavedGame);
-
       if (!savedGame) {
         setGameToast('Sorry, error occurred');
         return;
       }
+      const activePlayers = savedGame.map((player) => player !== null);
 
       setModel(savedGame);
+      setSettings((prev) => ({
+        ...prev,
+        isGamePaused: true,
+        activePlayers,
+      }));
     } catch {
       setGameToast('Sorry, error occurred');
     }
@@ -403,74 +612,36 @@ export const useGameLogic = () => {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      const currentKey = e.key;
+      e.preventDefault();
+      e.stopPropagation();
+      const currentKey = e.code;
 
-      if (
-        ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab'].includes(
-          currentKey,
-        )
-      ) {
-        e.preventDefault();
+      if (currentKey === 'KeyP') {
+        handleGamePause();
+        return;
       }
 
-      switch (currentKey) {
-        case 'ArrowLeft':
-          changeHorizontalPosition(1, 0);
-          break;
-        case 'ArrowRight':
-          changeHorizontalPosition(1, 1);
-          break;
-        case 'ArrowUp':
-          changeShape(1);
-          break;
-        case 'ArrowDown':
-          softDrop(1);
-          break;
-        case 'Control':
-          hardDrop(1);
-          break;
+      if (keyListening.isOn) return;
+      const { controls } = settings;
+      Object.entries(controls).forEach(([playerIndex, playerControls]) => {
+        const playerID = Number(playerIndex);
 
-        case '4':
-          changeHorizontalPosition(2, 0);
-          break;
-        case '6':
-          changeHorizontalPosition(2, 1);
-          break;
-        case '8':
-          changeShape(2);
-          break;
-        case '5':
-          softDrop(2);
-          break;
-        case '0':
-          hardDrop(2);
-          break;
-
-        case 'a':
-        case 'A':
-          changeHorizontalPosition(0, 0);
-          break;
-        case 'd':
-        case 'D':
-          changeHorizontalPosition(0, 1);
-          break;
-        case 'w':
-        case 'W':
-          changeShape(0);
-          break;
-        case 's':
-        case 'S':
-          softDrop(0);
-          break;
-        case 'Tab':
-          hardDrop(0);
-          break;
-
-        case 'p':
-        case 'P':
-          handleGamePause();
-          break;
-      }
+        if (currentKey === playerControls?.left?.key) {
+          changeHorizontalPosition(playerID, 0);
+        }
+        if (currentKey === playerControls?.right?.key) {
+          changeHorizontalPosition(playerID, 1);
+        }
+        if (currentKey === playerControls?.rotate?.key) {
+          changeShape(playerID);
+        }
+        if (currentKey === playerControls?.softDrop?.key) {
+          softDrop(playerID);
+        }
+        if (currentKey === playerControls?.hardDrop?.key) {
+          hardDrop(playerID);
+        }
+      });
     },
     [
       changeHorizontalPosition,
@@ -480,6 +651,9 @@ export const useGameLogic = () => {
       handleGamePause,
     ],
   );
+  useEffect(() => {
+    handleSettingsLoad();
+  }, []);
 
   useEffect(() => {
     const handleKeyboardPress = (e: KeyboardEvent) => {
@@ -491,7 +665,7 @@ export const useGameLogic = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyboardPress);
     };
-  }, [handleKeyDown]);
+  }, [handleKeyDown, settings.controls]);
 
   useEffect(() => {
     const tickSpeed = speedByLevel[Math.min(level, 15)];
@@ -503,20 +677,58 @@ export const useGameLogic = () => {
     return () => clearInterval(interval);
   }, [executeTick, level]);
 
+  useEffect(() => {
+    if (!keyListening.isOn) return;
+
+    const handleKeyBindPress = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleKeyBinding(e.key, e.code);
+    };
+
+    document.addEventListener('keydown', handleKeyBindPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyBindPress);
+    };
+  }, [keyListening.isOn, handleKeyBinding]);
+
+  useEffect(() => {
+    if (!gameToast) return;
+
+    const timeout = setTimeout(() => {
+      setGameToast('');
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [gameToast]);
+
+  useEffect(() => {
+    localStorage.setItem('arcadeTETRIS-controls', JSON.stringify(settings));
+  }, [settings]);
+
   const handlers = useMemo(
     () => ({
-      handleAcitvePlayerClick,
+      handleActivePlayerClick,
       handleGameSave,
       handleGameLoad,
       handleGamePause,
       handleNewGame,
+      openControlModal,
+      closeControlModal,
+      handleKeyBinding,
+      startKeyBinding,
     }),
     [
-      handleAcitvePlayerClick,
+      handleActivePlayerClick,
       handleGameSave,
       handleGameLoad,
       handleGamePause,
       handleNewGame,
+      openControlModal,
+      closeControlModal,
+      handleKeyBinding,
+      startKeyBinding,
     ],
   );
 
@@ -528,6 +740,9 @@ export const useGameLogic = () => {
     model,
     settings,
     setSettings,
+    isControlModalOpen,
+    startKeyBinding,
+    keyListening,
     handlers,
     totalLines,
     level,

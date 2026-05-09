@@ -2,6 +2,37 @@ import { PIECE_TYPES, TETRIS_SHAPES } from '@/components/blockTypes';
 import { Board, CurrentPiece, PieceTypes, Rotation } from '../types';
 import { Dispatch, SetStateAction } from 'react';
 
+export const initialControlConfig = {
+  0: {
+    left: 'a',
+    right: 'd',
+    rotate: 'w',
+    softDrop: 's',
+    hardDrop: 'Tab',
+  },
+  1: {
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    rotate: 'ArrowUp',
+    softDrop: 'ArrowDown',
+    hardDrop: 'Control',
+  },
+  2: {
+    left: '4',
+    right: '6',
+    rotate: '8',
+    softDrop: '5',
+    hardDrop: '0',
+  },
+  3: {
+    left: 'j',
+    right: 'l',
+    rotate: 'i',
+    softDrop: 'k',
+    hardDrop: ',',
+  },
+};
+
 export const determNextPiece = () =>
   PIECE_TYPES?.[Math.floor(Math.random() * PIECE_TYPES?.length)];
 

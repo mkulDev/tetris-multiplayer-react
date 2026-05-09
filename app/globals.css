@@ -9,6 +9,15 @@
   }
 }
 
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .animate-fade {
   animation: fade 0.3s ease-in-out;
 }

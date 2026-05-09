@@ -32,8 +32,8 @@ const StatCard = ({
 
 const PlayerGameBoard = ({ data, settings }: PlayerGameBoardProps) => {
   return (
-    <div className="w-full flex justify-center">
-      <div className="w-full max-w-125 self-center  rounded-3xl border border-neutral-300 bg-white/40 p-3 shadow-sm backdrop-blur-sm grid grid-cols-[2fr_1fr] gap-3">
+    <div className="flex justify-center ">
+      <div className="w-full max-w-125 self-center  shadow-md rounded-3xl border border-neutral-300 bg-white/40 p-3  backdrop-blur-sm grid grid-cols-[2fr_1fr] gap-3">
         <div className="w-full rounded-2xl border border-neutral-400/70 bg-neutral-50 aspect-[10/20] shadow-inner">
           {data?.board && (
             <RenderBoard
@@ -44,7 +44,7 @@ const PlayerGameBoard = ({ data, settings }: PlayerGameBoardProps) => {
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col w-full gap-3 overflow-hidden">
           <div className="rounded-2xl border border-neutral-300 bg-gradient-to-br from-white to-neutral-100 p-3 shadow-sm min-h-[220px] flex items-center justify-center">
             <RenderNextPieceBoard type={data?.nextPiece} />
           </div>
