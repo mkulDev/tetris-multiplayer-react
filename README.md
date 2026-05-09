@@ -10,7 +10,7 @@ I created it to practice working with more complex state, custom hooks, and game
 ## Live Demo
 
 Play online here:  
-https://arcade-tetris.vercel.app
+https://arcade-tetris-psi.vercel.app/
 
 ## What it does
 
