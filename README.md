@@ -15,6 +15,23 @@ I created it to practice working with more complex state, custom hooks, and game
 - Allows saving and loading the game from localStorage
 - Supports keyboard controls
 
+# Latest Update
+
+### Arcade UI Redesign
+
+- New retro arcade-inspired interface
+- Improved multiplayer layout
+- Better game state handling
+- Added save/load system
+- Added custom branding & icon
+- Improved component structure
+
+### Currently Working On
+
+- animations
+- sound effects
+- online multiplayer architecture
+
 ## Tech stack
 
 - React
