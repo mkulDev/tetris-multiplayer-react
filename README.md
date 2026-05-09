@@ -1,53 +1,84 @@
 # Tetris Multiplayer (React + TypeScript)
 
-This project is a simple multiplayer Tetris game built with React and TypeScript.
+A multiplayer Tetris game built with React, TypeScript and Next.js.
+
+I made this project mainly to practice handling more complex state management, game logic and keyboard interactions in React without using external game engines.
 
 ## Preview
 
-<img src="./public/tetris.jpg" alt="Game preview" width="600"/>
-I created it to practice working with more complex state, custom hooks, and game logic in React.
+<img src="./public/tetris.jpg" alt="Game preview" width="700"/>
 
 ## Live Demo
 
-Play online here:  
 https://arcade-tetris-psi.vercel.app/
 
-## What it does
+---
 
-- Supports multiple players
-- Handles game state using a custom hook
-- Includes scoring and level progression
-- Allows saving and loading the game from localStorage
-- Supports keyboard controls
+## Features
 
-# Latest Update
+- Up to 4 local players
+- Dynamic keyboard controls for each player
+- Piece rotation and collision detection
+- Score and level progression system
+- Save / load game using localStorage
+- Pause system
+- Responsive arcade-style UI
+- Independent game state for every player
 
-### Arcade UI Redesign
+---
 
-- New retro arcade-inspired interface
-- Improved multiplayer layout
-- Better game state handling
-- Added save/load system
-- Added custom branding & icon
-- Improved component structure
+## Technical Highlights
 
-### Currently Working On
+One of the main goals of this project was separating the game logic from the UI layer.
 
-- animations
-- sound effects
-- online multiplayer architecture
+Most of the core gameplay is handled inside a custom `useGameLogic` hook which manages:
 
-## Tech stack
+- gravity loop
+- movement handling
+- collision validation
+- line clearing
+- scoring
+- piece spawning
+- keyboard bindings
+- game persistence
+
+The rendering layer is split into smaller reusable components like:
+
+- `RenderBoard`
+- `RenderNextPiece`
+- `PlayerGameBoard`
+- `ControlsModal`
+
+I also used:
+
+- `React.memo`
+- `useMemo`
+- `useCallback`
+
+to reduce unnecessary re-renders during gameplay.
+
+---
+
+## Tech Stack
 
 - React
 - TypeScript
 - Next.js
+- Tailwind CSS
 
-## How to run the project
+---
+
+## Currently Working On
+
+- improving game loop performance
+- refactoring game state management
+
+---
+
+## Running Locally
 
 Clone the repository and install dependencies:
 
 ```bash
 npm install
 npm run dev
-```
