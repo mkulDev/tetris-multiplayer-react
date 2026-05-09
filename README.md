@@ -7,6 +7,11 @@ This project is a simple multiplayer Tetris game built with React and TypeScript
 <img src="./public/tetris.jpg" alt="Game preview" width="600"/>
 I created it to practice working with more complex state, custom hooks, and game logic in React.
 
+## Live Demo
+
+Play online here:  
+https://arcade-tetris.vercel.app
+
 ## What it does
 
 - Supports multiple players
